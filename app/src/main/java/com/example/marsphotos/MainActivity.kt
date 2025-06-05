@@ -19,23 +19,44 @@ package com.example.marsphotos
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.marsphotos.ui.MarsPhotosApp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.marsphotos.network.MealApiService
+import com.example.marsphotos.network.MealRepository
+import com.example.marsphotos.ui.MealScreen
+import com.example.marsphotos.ui.MealViewModel
+import com.example.marsphotos.ui.MealViewModelFactory
 import com.example.marsphotos.ui.theme.MarsPhotosTheme
+import kotlinx.serialization.json.Json
+import retrofit2.Retrofit
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import okhttp3.MediaType.Companion.toMediaType
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://www.themealdb.com/api/json/v1/1/")
+            .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+            .build()
+
+        val apiService = retrofit.create(MealApiService::class.java)
+        val repository = MealRepository(apiService)
+
         setContent {
             MarsPhotosTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
                 ) {
-                    MarsPhotosApp()
+                    val viewModel: MealViewModel = viewModel(
+                        factory = MealViewModelFactory(repository)
+                    )
+                    MealScreen(viewModel = viewModel)
                 }
             }
         }
