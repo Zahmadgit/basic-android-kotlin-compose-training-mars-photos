@@ -31,3 +31,4 @@ interface MarsApiService {
     @GET("photos")
     suspend fun getPhotos(): List<MarsPhoto>
 }
+//bruh
